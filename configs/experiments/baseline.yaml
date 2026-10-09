@@ -1,0 +1,18 @@
+# Full/balanced baseline: every valid demonstration in so100_pickplace@clean/v1.
+# This is the reference point every other data intervention is compared against.
+
+experiment_name: baseline_full
+hypothesis: >
+  SmolVLA fine-tuned on the complete, unmodified so100_pickplace demonstration
+  set establishes the reference performance (overall and per-slice) that the
+  reduced/imbalanced/rebalanced interventions are compared against.
+objective: >
+  Establish the full-data reference point for the quantity-vs-coverage
+  comparison (docs/EXPERIMENTS.md).
+
+intervention:
+  kind: full
+
+tags:
+  intervention: full_data
+  hypothesis: reference_point

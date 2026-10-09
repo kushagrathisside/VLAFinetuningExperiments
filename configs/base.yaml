@@ -1,0 +1,47 @@
+# Shared defaults for every so100_pickplace / SmolVLA experiment.
+# configs/experiments/<name>.yaml is deep-merged onto this file; only the
+# fields that differ need to appear there.
+
+dataset:
+  dataset_id: so100_pickplace
+  version: clean/v1   # the intervention/build step consumes this; NOT training/v1,
+                       # which is itself an *output* of that step (see docs/ARCHITECTURE.md)
+
+splits:
+  train: 0.8
+  val: 0.1
+  test: 0.1
+  seed: 42
+  mode: quantile   # exact split sizes at this episode count (48) -- see rde docs/11 code map
+
+training:
+  model: smolvla
+  pretrained_checkpoint: lerobot/smolvla_base
+  steps: 1000
+  batch_size: 4
+  learning_rate: 1.0e-4
+  weight_decay: 1.0e-5
+  grad_accum_steps: 1
+  max_grad_norm: 1.0
+  warmup_steps: 50
+  checkpoint_every: 100
+  validate_every: 100
+  val_batches: 8
+  keep_last_n_checkpoints: 3
+  seed: 0
+
+evaluation:
+  split: test
+  batch_size: 16
+  max_frames: null
+  success_tolerance: 0.1
+  baseline_models: [mean_action, nearest_neighbor]
+  selection_metric: mse
+  selection_mode: min
+  slices: [per_task, per_length_bucket]
+
+seeds: [0]
+tags:
+  embodiment: so100
+  task: pickplace
+  model: smolvla

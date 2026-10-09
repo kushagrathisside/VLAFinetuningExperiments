@@ -1,0 +1,12 @@
+runs
+experiments/*.jsonl
+paper_ready/
+__pycache__/
+*.pyc
+.pytest_cache/
+.coverage
+*.egg-info/
+.venv/
+
+# Internal code-review audit -- kept locally as a private record, not published.
+docs/CODE_REVIEW.md

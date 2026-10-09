@@ -1,0 +1,41 @@
+# Continuation of baseline_full: resumes from its best/final checkpoint
+# (step_1000) for a further budget at a reduced, freshly-warmed-up learning
+# rate, to see whether validation MSE -- which was still falling but had
+# slowed sharply by step 1000 (0.0060 -> 0.0040 -> 0.00396) -- keeps
+# improving with more steps or has effectively plateaued/starts overfitting
+# the 38-episode training split. Same dataset, splits, and intervention as
+# baseline_full, so the test set is identical and results are comparable.
+
+experiment_name: baseline_full_extended
+hypothesis: >
+  Continuing SmolVLA fine-tuning from baseline_full's best checkpoint for a
+  further 1000 steps at a reduced learning rate either keeps improving
+  validation MSE (data/optimization budget was the limiting factor) or
+  plateaus/regresses (the model had already converged for this data volume).
+objective: >
+  Extend the full-data reference run and compare its test-set result against
+  baseline_full on the identical, fixed test split.
+
+intervention:
+  kind: full
+
+training:
+  model: smolvla
+  pretrained_checkpoint: lerobot/smolvla_base
+  # Relative to the repository root (the directory `mtrain` is run from);
+  # point this at the baseline_full checkpoint produced by your own run.
+  resume_from: runs/2026-09-03/baseline_full/seed_0/checkpoints/step_1000
+  steps: 1000
+  batch_size: 4
+  learning_rate: 3.0e-5
+  warmup_steps: 20
+  checkpoint_every: 100
+  validate_every: 100
+  val_batches: 8
+  keep_last_n_checkpoints: 3
+  seed: 0
+
+tags:
+  intervention: full_data
+  hypothesis: extended_training
+  resumed_from: baseline_full/seed_0/checkpoints/step_1000

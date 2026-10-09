@@ -1,0 +1,41 @@
+# TEMPLATE -- not yet a runnable experiment. Depends on imbalanced.yaml having
+# been resolved first (see its header comment) and on failure analysis
+# (`mtrain analyze-failures`) having identified which slice actually needs
+# targeted correction.
+#
+# "Rebalanced" here means real, existing episodes belonging to the
+# under-represented value are *upweighted* during training (oversampled via
+# `episode_weights` / per-frame sampling probability -- see
+# `SmolVLAPolicy.fit`'s weighted sampler in rde/model_adapters/models.py), not
+# duplicated on disk and never synthetic. This project does not collect new
+# demonstrations, so "rebalanced" can only redistribute attention over data
+# that already exists -- the experiment report must state that limitation
+# plainly: do not claim a fixed weak regime unless the intervention and the
+# evidence both support it.
+#
+# Unlike imbalanced.yaml, this file does NOT load as-is: the schema requires
+# either `variable` or a non-empty `episode_weights` for kind=rebalanced, and
+# both are placeholder-empty below on purpose -- loading it before
+# `build-intervention` fills them in must fail loudly, not silently run as a
+# no-op full-data experiment.
+
+experiment_name: rebalanced_data
+hypothesis: >
+  TEMPLATE -- fill in after imbalanced.yaml's failure analysis: "Upweighting
+  the under-covered <variable>=<value> episodes recovers most of the
+  imbalanced run's degradation on that slice without materially hurting
+  overall or other-slice performance."
+objective: >
+  Test a targeted correction against the imbalanced run's specific weakness,
+  using only oversampling of existing data.
+
+intervention:
+  kind: rebalanced
+  episode_ids: []
+  episode_weights: {}
+  oversample_factor: 3.0
+  reason: "PLACEHOLDER -- regenerate via `mtrain build-intervention --kind rebalanced` after analyze-failures"
+
+tags:
+  intervention: rebalanced_data
+  hypothesis: targeted_correction

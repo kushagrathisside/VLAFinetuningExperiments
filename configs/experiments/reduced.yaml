@@ -1,0 +1,24 @@
+# Reduced data: ~50% of demonstrations, selected by a seeded random draw over
+# the full episode set (not a hand-picked subset) so the comparison isolates
+# quantity from any deliberate coverage change -- that is what `imbalanced.yaml`
+# is for.
+
+experiment_name: reduced_data
+hypothesis: >
+  Halving the demonstration count degrades SmolVLA's overall action-prediction
+  accuracy relative to baseline_full, and the degradation is not uniform across
+  the profiled slices (docs/EXPERIMENTS.md) -- some regimes lose more coverage
+  than others even under a random draw.
+objective: >
+  Measure the quantity effect in isolation, as the reference for what a
+  targeted (imbalanced/rebalanced) intervention should be judged against.
+
+intervention:
+  kind: reduced
+  fraction: 0.5
+  seed: 0
+  reason: "random ~50% episode subset, seeded -- see model_training.data.interventions.reduced()"
+
+tags:
+  intervention: reduced_data
+  hypothesis: quantity_vs_coverage

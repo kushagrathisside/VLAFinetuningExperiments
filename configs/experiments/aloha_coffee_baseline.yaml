@@ -1,0 +1,52 @@
+# First real SmolVLA fine-tuning pass on a second, structurally different
+# source dataset: lerobot/aloha_static_coffee (bimanual ALOHA, 14-DoF action
+# across two arms, four cameras, a four-stage compound task -- capsule into
+# machine, cup onto tray, two button presses -- at 50 fps). Same pipeline,
+# same adapter, no code changes: this tests whether that generalizes, not
+# just whether it works on so100_pickplace.
+
+experiment_name: aloha_coffee_baseline
+hypothesis: >
+  The SmolVLA adapter and training pipeline validated on so100_pickplace
+  (6-DoF single arm, 2 cameras, single-step pick-place) generalizes without
+  code changes to aloha_static_coffee (14-DoF bimanual, 4 cameras, a longer
+  compound task), since both the adapter and fit() read camera/action shape
+  from the dataset contract rather than assuming so100's schema.
+objective: >
+  Establish a first real, non-fabricated SmolVLA reference result on
+  aloha_coffee, comparable in kind (not magnitude) to the so100_pickplace
+  baseline.
+
+dataset:
+  dataset_id: aloha_coffee
+  version: clean/v1
+
+intervention:
+  kind: full
+
+training:
+  model: smolvla
+  pretrained_checkpoint: lerobot/smolvla_base
+  steps: 1000
+  batch_size: 4
+  learning_rate: 1.0e-4
+  warmup_steps: 50
+  checkpoint_every: 100
+  validate_every: 100
+  val_batches: 8
+  keep_last_n_checkpoints: 3
+  seed: 0
+
+evaluation:
+  # aloha_coffee carries exactly one task_id, so a "per_task" slice would be
+  # an exact duplicate of "overall" -- pure redundant video-decode cost (AV1,
+  # 4 cameras) with zero new information. episode-length is the only real
+  # stratification axis here, same reasoning as so100_pickplace.
+  slices: [per_length_bucket]
+
+tags:
+  embodiment: aloha
+  task: coffee
+  model: smolvla
+  intervention: full_data
+  hypothesis: cross_dataset_generalization

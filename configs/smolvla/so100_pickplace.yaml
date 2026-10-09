@@ -1,0 +1,16 @@
+# Model-specific defaults for SmolVLA on so100_pickplace. Not auto-merged (the
+# loader only merges configs/base.yaml onto an experiment config); include its
+# contents in an experiment file's `training:` block, or point --base at it
+# explicitly, if a second model-specific layer is wanted beyond configs/base.yaml.
+
+training:
+  model: smolvla
+  pretrained_checkpoint: lerobot/smolvla_base
+  batch_size: 4
+  learning_rate: 1.0e-4
+  warmup_steps: 50
+  grad_accum_steps: 1
+  max_grad_norm: 1.0
+
+evaluation:
+  baseline_models: [mean_action, nearest_neighbor]
