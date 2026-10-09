@@ -1,0 +1,122 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1030" height="874" viewBox="0 0 1030 874" role="img" aria-label="System architecture of vla-finetune. ExperimentRunner.run executes seven stages in order: configure, intervene, verify and profile, train, evaluate, analyse and package, and report. Stages two to six call episodic-data-engine services: transform and DatasetBuilder, DataEngine.get_dataset, SmolVLAPolicy, Evaluator and FeedbackLoop. Each stage writes named artifacts into the run directory. The feedback artifact&#x27;s recommended action informs the next intervention, which produces a new dataset version. After the run, mtrain compare, analyze-failures, export and the DeployedModel runtime consume the run directory.">
+  <style>
+    svg{
+      --panel:#FFFFFF; --panel-2:#EEF2F4; --rule:#DCE3E7; --rule-2:#C7D2D8;
+      --ink:#101C24; --accent:#0E6E8B; --accent-soft:#E2EFF4; --accent-line:#8FC2D4;
+      --signal:#B45309; --signal-soft:#FBEEDF;
+      --ok:#17694A; --ok-soft:#E1F0E9; --warn:#8A6100; --warn-soft:#F8EFD9;
+      --err:#A32B23; --err-soft:#F8E6E4;
+      --sans:"IBM Plex Sans",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+      --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      color:var(--ink);
+    }
+    @media (prefers-color-scheme:dark){
+      svg{
+        --panel:#121C22; --panel-2:#18242B; --rule:#22313A; --rule-2:#2E414C;
+        --ink:#E3EBEF; --accent:#4FBEDC; --accent-soft:#122B34; --accent-line:#2C6D82;
+        --signal:#E0913F; --signal-soft:#2E2213;
+        --ok:#4FB98A; --ok-soft:#10281F; --warn:#D9A93C; --warn-soft:#2A2312;
+        --err:#E5726A; --err-soft:#2E1917;
+      }
+    }
+    .s-box{fill:var(--panel-2);stroke:var(--rule-2);stroke-width:1.5}
+    .s-proc{fill:var(--accent-soft);stroke:var(--accent-line);stroke-width:1.5}
+    .s-store{fill:var(--panel-2);stroke:var(--rule-2);stroke-width:1.5}
+    .s-ext{fill:none;stroke:currentColor;stroke-width:1.5;stroke-dasharray:5 3;opacity:.7}
+    .s-hot{fill:var(--signal-soft);stroke:var(--signal);stroke-width:1.75}
+    .s-line{stroke:currentColor;stroke-width:1.4;fill:none;opacity:.75}
+    .s-line-hot{stroke:var(--signal);stroke-width:2;fill:none}
+    .s-line-soft{stroke:currentColor;stroke-width:1.2;fill:none;opacity:.4;stroke-dasharray:4 3}
+    text{paint-order:stroke fill;stroke:var(--panel);stroke-width:3.5px;
+         stroke-linejoin:round;stroke-linecap:round}
+    .t-lbl{font-family:var(--sans);font-size:13.5px;font-weight:500;fill:currentColor}
+    .t-sm{font-family:var(--mono);font-size:11.5px;fill:currentColor;opacity:.78}
+    .t-tag{font-family:var(--mono);font-size:10.5px;fill:var(--accent);font-weight:600;letter-spacing:.06em}
+    .t-hot{font-family:var(--mono);font-size:11.5px;fill:var(--signal);font-weight:500}
+    .t-num{font-family:var(--mono);font-size:11.5px;font-weight:700;fill:var(--accent)}
+  </style>
+  <rect width="1030" height="874" fill="var(--panel)"/>
+  <defs><marker id="arv" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="currentColor"/></marker><marker id="arvh" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="var(--signal)"/></marker></defs>
+  <rect x="12" y="44" width="324" height="688" rx="6" fill="var(--panel-2)" stroke="var(--rule)" stroke-width="1"/>
+  <text class="t-tag" x="24" y="30">EPISODIC-DATA-ENGINE · rde</text>
+  <text class="t-sm" x="24" y="66">services called by each stage</text>
+  <text class="t-tag" x="376" y="30">VLA-FINETUNE · model_training</text>
+  <text class="t-sm" x="376" y="66">ExperimentRunner.run — one call, seven stages</text>
+  <rect class="s-proc" x="376" y="92" width="560" height="70" rx="5"/>
+  <text class="t-num" x="390" y="114">1</text>
+  <text class="t-lbl" x="408" y="114">Configure</text>
+  <text class="t-sm" x="408" y="134">ExperimentConfig from YAML, validated with pydantic</text>
+  <text class="t-hot" x="408" y="152" style="fill:var(--accent)">config.resolved.yaml · environment.json · git.json</text>
+  <path class="s-line" d="M656,164 L656,180" marker-end="url(#arv)"/>
+  <rect class="s-proc" x="376" y="184" width="560" height="70" rx="5"/>
+  <text class="t-num" x="390" y="206">2</text>
+  <text class="t-lbl" x="408" y="206">Intervene</text>
+  <text class="t-sm" x="408" y="226">build_intervention_dataset: full · fraction · imbalanced · rebalanced</text>
+  <text class="t-hot" x="408" y="244" style="fill:var(--accent)">dataset.json → training/vN in the catalog</text>
+  <path class="s-line" d="M656,256 L656,272" marker-end="url(#arv)"/>
+  <rect class="s-box" x="24" y="192" width="300" height="54" rx="4" style="fill:var(--panel)"/>
+  <text class="t-lbl" x="38" y="214">transform + DatasetBuilder</text>
+  <text class="t-sm" x="38" y="233">EpisodeSubsetFilter · lineage-tracked</text>
+  <path class="s-line-soft" d="M372,219 L328,219" marker-end="url(#arv)"/>
+  <rect class="s-proc" x="376" y="276" width="560" height="70" rx="5"/>
+  <text class="t-num" x="390" y="298">3</text>
+  <text class="t-lbl" x="408" y="298">Verify and profile</text>
+  <text class="t-sm" x="408" y="318">split-integrity check (raises on leakage) · coverage profile</text>
+  <text class="t-hot" x="408" y="336" style="fill:var(--accent)">split_integrity.json · dataset_profile.json</text>
+  <path class="s-line" d="M656,348 L656,364" marker-end="url(#arv)"/>
+  <rect class="s-box" x="24" y="284" width="300" height="54" rx="4" style="fill:var(--panel)"/>
+  <text class="t-lbl" x="38" y="306">DataEngine.get_dataset</text>
+  <text class="t-sm" x="38" y="325">DatasetView · training contract</text>
+  <path class="s-line-soft" d="M372,311 L328,311" marker-end="url(#arv)"/>
+  <rect class="s-proc" x="376" y="368" width="560" height="70" rx="5"/>
+  <text class="t-num" x="390" y="390">4</text>
+  <text class="t-lbl" x="408" y="390">Train</text>
+  <text class="t-sm" x="408" y="410">Trainer: periodic checkpoints and validation, best verified checkpoint</text>
+  <text class="t-hot" x="408" y="428" style="fill:var(--accent)">checkpoints/ · metrics/*.jsonl · crash.json on failure</text>
+  <path class="s-line" d="M656,440 L656,456" marker-end="url(#arv)"/>
+  <rect class="s-box" x="24" y="376" width="300" height="54" rx="4" style="fill:var(--panel)"/>
+  <text class="t-lbl" x="38" y="398">SmolVLAPolicy</text>
+  <text class="t-sm" x="38" y="417">fit · save · verify checkpoint</text>
+  <path class="s-line-soft" d="M372,403 L328,403" marker-end="url(#arv)"/>
+  <rect class="s-proc" x="376" y="460" width="560" height="70" rx="5"/>
+  <text class="t-num" x="390" y="482">5</text>
+  <text class="t-lbl" x="408" y="482">Evaluate</text>
+  <text class="t-sm" x="408" y="502">baselines · test split · stratified slices · error distribution</text>
+  <text class="t-hot" x="408" y="520" style="fill:var(--accent)">evaluation/*.json</text>
+  <path class="s-line" d="M656,532 L656,548" marker-end="url(#arv)"/>
+  <rect class="s-box" x="24" y="468" width="300" height="54" rx="4" style="fill:var(--panel)"/>
+  <text class="t-lbl" x="38" y="490">Evaluator</text>
+  <text class="t-sm" x="38" y="509">evaluate(split | episode_ids)</text>
+  <path class="s-line-soft" d="M372,495 L328,495" marker-end="url(#arv)"/>
+  <rect class="s-hot" x="376" y="552" width="560" height="70" rx="5"/>
+  <text class="t-num" x="390" y="574">6</text>
+  <text class="t-lbl" x="408" y="574">Analyse and package</text>
+  <text class="t-sm" x="408" y="594">feedback artifact · ModelArtifact · model card</text>
+  <text class="t-hot" x="408" y="612" style="fill:var(--accent)">failures/feedback_artifact.json · reports/model_card.md</text>
+  <path class="s-line" d="M656,624 L656,640" marker-end="url(#arv)"/>
+  <rect class="s-box" x="24" y="560" width="300" height="54" rx="4" style="fill:var(--panel)"/>
+  <text class="t-lbl" x="38" y="582">FeedbackLoop</text>
+  <text class="t-sm" x="38" y="601">failure frames · episode nomination</text>
+  <path class="s-line-soft" d="M372,587 L328,587" marker-end="url(#arv)"/>
+  <rect class="s-proc" x="376" y="644" width="560" height="70" rx="5"/>
+  <text class="t-num" x="390" y="666">7</text>
+  <text class="t-lbl" x="408" y="666">Report</text>
+  <text class="t-sm" x="408" y="686">experiment report · figures · cross-run index rows</text>
+  <text class="t-hot" x="408" y="704" style="fill:var(--accent)">reports/experiment_report.md · summary.json · experiments/*.jsonl</text>
+  <path class="s-line-hot" d="M938,587 L962,587 Q976,587 976,573 L976,233 Q976,219 962,219 L942,219" marker-end="url(#arvh)" stroke-dasharray="6 4"/>
+  <text class="t-hot" x="990" y="403" transform="rotate(90 990 403)" text-anchor="middle">next intervention → new version</text>
+  <rect x="12" y="754" width="1006" height="100" rx="6" fill="none" stroke="var(--signal)" stroke-width="1.2" stroke-dasharray="5 4"/>
+  <text class="t-tag" x="24" y="778" style="fill:var(--signal)">AFTER THE RUN</text>
+  <rect class="s-box" x="24" y="790" width="233" height="50" rx="4"/>
+  <text class="t-lbl" x="140" y="811" text-anchor="middle">mtrain compare</text>
+  <text class="t-sm" x="140" y="829" text-anchor="middle">cross-run comparison table</text>
+  <rect class="s-box" x="273" y="790" width="233" height="50" rx="4"/>
+  <text class="t-lbl" x="389" y="811" text-anchor="middle">mtrain analyze-failures</text>
+  <text class="t-sm" x="389" y="829" text-anchor="middle">print the feedback artifact</text>
+  <rect class="s-box" x="522" y="790" width="233" height="50" rx="4"/>
+  <text class="t-lbl" x="638" y="811" text-anchor="middle">mtrain export</text>
+  <text class="t-sm" x="638" y="829" text-anchor="middle">copy traceable artifacts</text>
+  <rect class="s-box" x="771" y="790" width="233" height="50" rx="4"/>
+  <text class="t-lbl" x="887" y="811" text-anchor="middle">DeployedModel</text>
+  <text class="t-sm" x="887" y="829" text-anchor="middle">health check · latency</text>
+</svg>
