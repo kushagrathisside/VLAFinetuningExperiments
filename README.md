@@ -81,15 +81,55 @@ The results support four statements, and no stronger ones.
 3. **At this budget, SmolVLA matches but does not beat retrieval.** On SO-100 its test MSE equals frame-level nearest-neighbour retrieval (0.0239 against 0.0239). On ALOHA, retrieval is better by a factor of two (0.106 against 0.216). Retrieval is a strong baseline when test episodes come from the same setup as the training episodes, and beating it is the relevant target for further training.
 4. **The measurements are open-loop, offline, and single-seed.** No closed-loop rollout or physical-robot success rate is claimed (§10).
 
-**Failure analysis.** On the 2,000-step SO-100 run, the 90th-percentile error rule flags 191 of 1,908 test frames. Every test episode contains some of them, but no episode fails on more than 14% of its frames (range 6.5–13.8%). The feedback artifact therefore classifies the failures as scattered, which points to a model or coverage limitation rather than defective episodes. On ALOHA, 440 of 4,400 frames are flagged, and two of the four test episodes carry most of them (22.6% and 12.1% of their frames). These figures were recomputed from each run's saved per-frame test outcomes with the current engine. An earlier engine version treated SmolVLA's constant confidence value as low confidence on every frame and flagged the entire split; the current `FeedbackLoop` ignores a confidence that never varies (§3.4).
+### 2.1 Error Metrics
+
+Table 3 gives the full error profile on each test split, including both baselines. Per-frame error is the mean absolute error across action dimensions for one frame; its distribution shows how heavy the error tail is.
+
+**Table 3. Test-split error metrics.** MSE, MAE, and RMSE are in normalized action units. Normalized MAE divides each dimension's MAE by that dimension's standard deviation before averaging.
+
+| Model | Dataset | MSE | MAE | RMSE | Normalized MAE | Per-frame error: median / p90 / p99 / max |
+|---|---|---:|---:|---:|---:|---|
+| SmolVLA, 1,000 steps | SO-100 | 0.0290 | 0.111 | 0.170 | 0.119 | 0.100 / 0.193 / 0.292 / 0.553 |
+| SmolVLA, 2,000 steps | SO-100 | 0.0239 | 0.097 | 0.155 | 0.105 | 0.089 / 0.174 / 0.272 / 0.375 |
+| Nearest neighbour | SO-100 | 0.0239 | 0.097 | 0.154 | 0.104 | — |
+| Mean action | SO-100 | 0.908 | 0.789 | 0.953 | — | — |
+| SmolVLA, 1,000 steps | ALOHA coffee | 0.2157 | 0.341 | 0.464 | 0.347 | 0.314 / 0.525 / 0.732 / 0.910 |
+| Nearest neighbour | ALOHA coffee | 0.1062 | 0.236 | 0.326 | — | — |
+| Mean action | ALOHA coffee | 1.010 | 0.813 | 1.005 | — | — |
+
+A dash marks a value the run did not record for that model. Continued training on SO-100 shortened the tail more than the median: p99 error fell by 7% (0.292 → 0.272), and the worst single frame fell by 32% (0.553 → 0.375).
+
+### 2.2 Where the Errors Are
+
+**By joint.** Error grows from the base of the arm toward the end effector (Table 4). On ALOHA the left gripper is the hardest dimension at 0.587. The right arm's dimensions range from 0.315 to 0.416, and the left arm's other joints from 0.245 to 0.295.
+
+**Table 4. Per-joint test MAE, SO-100, 2,000-step run.**
+
+| Shoulder pan | Shoulder lift | Elbow flex | Wrist flex | Wrist roll | Gripper |
+|---:|---:|---:|---:|---:|---:|
+| 0.063 | 0.074 | 0.088 | 0.092 | 0.110 | 0.157 |
+
+**By episode phase.** Mean error binned by normalized episode progress (tenths of each episode) shows where in a demonstration the policy struggles. On SO-100 (2,000-step run), error is lowest at the start (0.051) and the end (0.049) of an episode and peaks in the middle of the episode at 0.144 (50–60% progress). On ALOHA it ranges from 0.265 to 0.402 and is highest in the final tenth of the episode.
+
+**By episode and slice.** Per-episode MAE on SO-100 ranges from 0.085 to 0.111 across the five test episodes (2,000-step run), and from 0.296 to 0.405 across the four ALOHA test episodes. Split into within-split length terciles, long SO-100 episodes are easier (MSE 0.0206) than short (0.0290) and medium (0.0311) ones. The length slices carry no information on ALOHA, because all four of its test episodes are 1,100 frames long and fall into one bucket.
+
+### 2.3 Inference Noise and Compute
+
+SmolVLA generates actions by flow matching from sampled noise, so scoring the same frames twice does not give identical errors. The stratified pass re-scores all 1,908 SO-100 test frames, and its MSE differs from the main pass by up to 5% (0.0305 against 0.0290 for the 1,000-step run, 0.0232 against 0.0239 for the 2,000-step run). The 18% improvement from continued training is well outside this spread, but differences of a few percent between single evaluations should not be read as real.
+
+Each run peaked at 3.0–3.3 GB of host memory and 2.2–3.0 GB of GPU memory (the GPU figures are in Table 2). Model inference took 47–50 ms per frame on SO-100 and 86 ms per frame on ALOHA, which has four cameras and a fourteen-dimensional action space. These figures are prediction time divided by batch size for evaluation batches of 16 frames; they exclude data loading and are not a deployment latency measurement ([`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md)).
+
+### 2.4 Failure Analysis
+
+On the 2,000-step SO-100 run, the 90th-percentile error rule flags 191 of 1,908 test frames. Every test episode contains some of them, but no episode fails on more than 14% of its frames (range 6.5–13.8%). The feedback artifact therefore classifies the failures as scattered, which points to a model or coverage limitation rather than defective episodes. On ALOHA, 440 of 4,400 frames are flagged, and two of the four test episodes carry most of them (22.6% and 12.1% of their frames). These figures were recomputed from each run's saved per-frame test outcomes with the current engine. An earlier engine version treated SmolVLA's constant confidence value as low confidence on every frame and flagged the entire split; the current `FeedbackLoop` ignores a confidence that never varies (§3.4).
 
 ## 3. Four Properties That Matter
 
 ### 3.1 Every Data Intervention Is a Versioned Dataset
 
-A data intervention selects or reweights episodes to test a hypothesis about data quantity or coverage. Table 3 lists the supported kinds. Each one becomes a genuine engine transform, using the `EpisodeSubsetFilter` operator, followed by a dataset build. The result is a new `training/vN` version with its own lineage, so the question "which raw episodes trained this model?" remains a single query.
+A data intervention selects or reweights episodes to test a hypothesis about data quantity or coverage. Table 5 lists the supported kinds. Each one becomes a genuine engine transform, using the `EpisodeSubsetFilter` operator, followed by a dataset build. The result is a new `training/vN` version with its own lineage, so the question "which raw episodes trained this model?" remains a single query.
 
-**Table 3. Supported data interventions.**
+**Table 5. Supported data interventions.**
 
 | Kind | Selection |
 |---|---|
@@ -127,9 +167,9 @@ git clone https://github.com/kushagrathisside/VLAFinetuningExperiments vla-finet
 cd vla-finetune
 ```
 
-Two Python environments are created in the shared parent directory, mirroring the engine's split between a lightweight base install and an optional dependency group for the VLA model (Table 4).
+Two Python environments are created in the shared parent directory, mirroring the engine's split between a lightweight base install and an optional dependency group for the VLA model (Table 6).
 
-**Table 4. Installation targets.**
+**Table 6. Installation targets.**
 
 | Environment | Purpose | Commands |
 |---|---|---|
@@ -162,9 +202,9 @@ run_data_fraction_sweep(config, fractions=[0.25, 0.5, 1.0])   # varies only the 
 
 ## 5. Architecture
 
-Table 5 summarizes the responsibility of each module. The dependency runs in one direction only: `model_training` imports `rde`, and `rde` imports nothing from `model_training`. Three additive changes were made to the engine to support this package: `SmolVLAPolicy.fit()` with checkpoint save, load, and verification; an `episode_ids` selector on `Evaluator.evaluate()`; and the `EpisodeSubsetFilter` transform ([`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) §4).
+Table 7 summarizes the responsibility of each module. The dependency runs in one direction only: `model_training` imports `rde`, and `rde` imports nothing from `model_training`. Three additive changes were made to the engine to support this package: `SmolVLAPolicy.fit()` with checkpoint save, load, and verification; an `episode_ids` selector on `Evaluator.evaluate()`; and the `EpisodeSubsetFilter` transform ([`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) §4).
 
-**Table 5. Module responsibilities.**
+**Table 7. Module responsibilities.**
 
 | Module | Responsibility |
 |---|---|
@@ -181,7 +221,7 @@ Table 5 summarizes the responsibility of each module. The dependency runs in one
 
 ## 6. Shipped Experiment Configurations
 
-**Table 6. Configurations in `configs/experiments/`.**
+**Table 8. Configurations in `configs/experiments/`.**
 
 | Configuration | Intervention | Status |
 |---|---|---|
@@ -194,7 +234,7 @@ Table 5 summarizes the responsibility of each module. The dependency runs in one
 
 ## 7. Command-Line Interface
 
-**Table 7. `mtrain` subcommands.** Each has an equivalent wrapper under `scripts/` for environments in which the console script is not on the path.
+**Table 9. `mtrain` subcommands.** Each has an equivalent wrapper under `scripts/` for environments in which the console script is not on the path.
 
 | Command | Purpose |
 |---|---|
@@ -211,9 +251,9 @@ Table 5 summarizes the responsibility of each module. The dependency runs in one
 
 ## 8. Run Directory
 
-Every `mtrain train` invocation creates `runs/<date>/<experiment_name>/seed_<seed>/` and refuses to overwrite a non-empty directory (Table 8). Each run also appends rows to a cross-run index (`experiments/*.jsonl`) that can be queried with `jq`, `pandas`, or DuckDB. Both directories are excluded from version control.
+Every `mtrain train` invocation creates `runs/<date>/<experiment_name>/seed_<seed>/` and refuses to overwrite a non-empty directory (Table 10). Each run also appends rows to a cross-run index (`experiments/*.jsonl`) that can be queried with `jq`, `pandas`, or DuckDB. Both directories are excluded from version control.
 
-**Table 8. Run directory contents.**
+**Table 10. Run directory contents.**
 
 | Category | Files |
 |---|---|
@@ -226,7 +266,7 @@ Every `mtrain train` invocation creates `runs/<date>/<experiment_name>/seed_<see
 
 ## 9. Documentation and Tests
 
-**Table 9. Documentation index.**
+**Table 11. Documentation index.**
 
 | Document | Content |
 |---|---|

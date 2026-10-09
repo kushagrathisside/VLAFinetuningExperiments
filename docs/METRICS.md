@@ -24,7 +24,7 @@ reused without modification.
 | `normalized_mae` | Per-dimension `mae` divided by that dimension's own standard deviation over the evaluated frames, averaged across dimensions. | Comparable across dimensions whose natural ranges differ. | Dimensions with near-zero spread (below 10⁻³ of the median spread) are excluded, because dividing by them inflates the metric by orders of magnitude on small validation batches; `normalized_mae_dims` reports how many dimensions were kept. |
 | `success_rate` | Fraction of frames with mean absolute error below a configurable tolerance (default 0.1). | An explicit proxy for task success, not a measurement of it. | Should never be reported without this qualification. |
 | `mean_confidence`, `confidence_error_corr` | Mean of `Prediction.confidence`; Pearson correlation between confidence and error. | Meaningful for the nearest-neighbor baseline (a correlation of approximately −0.79 was measured on the test split). | For SmolVLA, confidence is an uncalibrated constant (recorded in `Prediction.metadata.confidence_note`), so this correlation carries no information for that model. |
-| `latency_ms_per_frame` | Wall-clock time per prediction, from `Model.timed_predict`. | Inference cost under the evaluation harness. | Not a substitute for the deployment latency breakdown described in Section 9. |
+| `latency_ms_per_frame` | Wall-clock time of each batched prediction from `Model.timed_predict`, divided by the batch size, averaged over batches. Excludes data loading and input adaptation. | Inference cost under the evaluation harness. | Not a substitute for the deployment latency breakdown described in Section 9. |
 
 Baseline-relative metrics (`mse_ratio`, `mae_ratio`) are computed by
 `rde.evaluation.Evaluator.compare` and by
@@ -48,7 +48,11 @@ alongside the percentile values.
 
 `model_training.evaluation.offline.episode_metrics` aggregates the per-frame
 outcomes already produced by `Evaluator.evaluate` into per-episode `mae`,
-`mse`, `rmse`, and maximum error. The grain is one row per episode present in
+`mse`, `rmse`, and maximum error. Each is computed from the frame's scalar
+error, the mean absolute error across action dimensions. The per-episode `mae`
+therefore averages to the split-level `mae`, but the per-episode `mse` is the
+mean of squared per-frame errors and is not comparable to the split-level
+`mse`, which squares each dimension's error before averaging. The grain is one row per episode present in
 the evaluated split or slice. These values are used both in report tables
 and by `rde.feedback.FeedbackLoop`'s episode nomination.
 
