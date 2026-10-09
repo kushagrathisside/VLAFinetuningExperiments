@@ -90,7 +90,7 @@ than an untraceable local copy of the data.
 
 Every change is additive. No existing call site, test, or command-line
 behavior in `episodic-data-engine` was altered, and the engine's full test
-suite (186 tests: 185 passing, 1 skipped) passes unmodified after all three
+suite (188 tests: 187 passing, 1 skipped) passes unmodified after all three
 changes. Each change is accompanied by new tests in
 `episodic-data-engine/tests/`.
 

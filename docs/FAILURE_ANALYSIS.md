@@ -17,7 +17,12 @@ reimplementing failure detection. A frame is flagged as `HIGH_ERROR`,
 `LOW_CONFIDENCE`, or `BOTH` against percentiles computed from the current
 evaluation run, not a fixed absolute threshold; a fixed threshold would flag
 either everything or nothing the moment the model or the normalization
-scheme changes. `FeedbackLoop`'s internal nomination procedure aggregates
+scheme changes. The confidence criterion applies only when a model's
+confidence varies across frames. SmolVLA reports a constant confidence, so its
+failures are judged on error alone; the run's `thresholds` record this as
+`confidence_used: false`. Before this rule existed, a constant confidence
+placed every frame at its own percentile and flagged the entire test split.
+`FeedbackLoop`'s internal nomination procedure aggregates
 frame-level flags into episode-level reviews, ranked by a priority score
 equal to the product of the failure rate and one plus the mean error, so
 that an episode failing often and severely outranks one with a small number

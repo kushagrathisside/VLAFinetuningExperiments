@@ -16,8 +16,8 @@ intended as a durable reference for the design decisions underlying the
 ## 2. Findings: The Existing Data Engine
 
 `episodic-data-engine` (Python package `rde`) is a mature, tested, and
-documented data engine comprising 47 modules and 14,949 lines of code, with
-a test suite of 186 tests (185 passing, 1 skipped) in the light environment
+documented data engine comprising 47 modules and 14,979 lines of code, with
+a test suite of 188 tests (187 passing, 1 skipped) in the light environment
 `../.venv`, which carries no heavy machine-learning dependency. Its
 documentation series (`episodic-data-engine/docs/00`–`17`) was verified
 against the source rather than assumed to be current.
@@ -129,7 +129,7 @@ than duplicate it. Table 3 lists these changes.
 | `rde/transformations/ops.py` | Added `EpisodeSubsetFilter`, a fourth episode filter alongside the existing `QualityFilter`, `LengthFilter`, and `TaskFilter`. | The mechanism by which reduced and imbalanced dataset variants become genuine, lineage-tracked `transform` runs, rather than an untraceable local copy. |
 
 Each change is additive: no existing call site, test, or command-line
-behavior was altered. The full `episodic-data-engine` test suite (186 tests)
+behavior was altered. The full `episodic-data-engine` test suite (188 tests)
 passes unmodified after all three changes, and new tests were added
 alongside each one.
 
